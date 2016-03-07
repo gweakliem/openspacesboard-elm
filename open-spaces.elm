@@ -9,7 +9,7 @@ import String
 import Time exposing (Time)
 import Result exposing (Result)
 import List
-import StartApp
+import StartApp.Simple exposing (start)
 
 -- MODEL
 type alias LocationModel = {
@@ -58,21 +58,31 @@ initialModel = {
 -- UPDATE
 
 type Action = NoOp
-  | Sort
+  | SortByTime
+--  | SortByLocation
+--  | AddSession
 
 update action model =
   case action of
     NoOp ->
       model
 
-    Sort ->
+    SortByTime ->
       { model | sessions = List.sortBy .startTime model.sessions }
+
+--    SortByLocation ->
+--      { model | sessions = List.sortBy .location model.sessions }
 
 -- VIEW
 
 makeSessionItem : SessionModel -> Html
 makeSessionItem session =
-  li [class "session-item"] [text session.name]
+  li [class "session-item"]
+    [div [class "session-tile"]
+      [text session.name,
+       div [class "badge"] [text session.convener]
+      ]
+    ]
 
 
 sessionList : List(SessionModel) -> Html
@@ -91,8 +101,8 @@ pageFooter =
   div [class "footer"] []
 
 
-view : Model -> Html
-view model =
+view : Signal.Address Action -> Model -> Html
+view address model =
   div [id "container"]
     [ pageHeader,
       sessionList model.sessions,
@@ -101,10 +111,4 @@ view model =
 
 
 main =
-  view initialModel
---  StartApp.start
---    {
---      model = initialModel,
---      view = view,
---      update = update
---    }
+  StartApp.Simple.start { model = initialModel, update = update, view = view }
